@@ -1,0 +1,1 @@
+ALTER TABLE user_preferences ADD COLUMN reminder_sent_on TEXT;

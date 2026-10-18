@@ -1,0 +1,592 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "TataDana local server",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"start"
+			],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "TataDana seed admin",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"run",
+				"db:seed"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Verify TataDana admin seed",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"-e",
+				"const bcrypt=require('bcryptjs');const db=require('./src/db/database');const user=db.prepare('SELECT id,name,email,role,password_hash FROM users WHERE email = ?').get('restu@tatadana.id');if(!user)throw new Error('Admin row missing');bcrypt.compare('Restu21!',user.password_hash).then(passwordValid=>{console.log({name:user.name,email:user.email,role:user.role,passwordValid,adminCount:db.prepare(\"SELECT count(*) AS count FROM users WHERE role = 'admin'\").get().count});db.close();if(!passwordValid)process.exitCode=1}).catch(error=>{console.error(error);db.close();process.exitCode=1});"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "TataDana migrate financial schema",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"run",
+				"db:migrate"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Validate finance service syntax",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/services/finance.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Migrate TataDana integrations",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"run",
+				"db:migrate"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Migrate bot and payments",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"run",
+				"db:migrate"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check AI provider syntax",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/services/secret-vault.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check Gemini provider syntax",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/providers/ai/gemini.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check Telegram service syntax",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/services/telegram.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Migrate Telegram transport",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"run",
+				"db:migrate"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check finance routes syntax",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/routes/finance.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check Midtrans provider syntax",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/providers/payments/midtrans.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check finance router syntax",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/routes/finance.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check application and server syntax",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/app.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check transaction form script",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"public/app.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Validate finance service updates",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/services/finance.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Validate public EJS render",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"-e",
+				"require(\"ejs\").renderFile(\"src/views/pages/landing.ejs\", { title: \"TataDana\" }).then((html) => { if (!html.includes(\"<main class=\\\"landing-main\\\">\") || !html.endsWith(\"</html>\")) throw new Error(\"Public layout shell is incomplete\"); console.log(\"Landing EJS and public layout passed\"); }).catch((error) => { console.error(error); process.exitCode = 1; });"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check dashboard analytics",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/services/finance.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Migrate reminder state",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"run",
+				"db:migrate"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check reminder scheduler",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/services/reminders.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check environment-based seeder",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/db/seed-admin.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run finance regression tests",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"test"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Rerun finance regression tests",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"test"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check secure payment routes",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/routes/finance.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check Telegram idempotency",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/services/telegram.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check Telegram response formatting",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/services/telegram.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Sync TataDana dependencies",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"install"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run TataDana test suite",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"test"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check admin management routes",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/app.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Validate admin and Telegram hardening",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/services/telegram.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Validate admin guards",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/app.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check WIB settings month",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/routes/finance.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Stop stale TataDana server",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$servers = Get-CimInstance Win32_Process -Filter \"Name='node.exe'\" | Where-Object { $_.CommandLine -match 'Tatadana\\\\src\\\\server\\.js' }; $servers | ForEach-Object { Stop-Process -Id $_.ProcessId -Force; Write-Output ('Stopped TataDana PID ' + $_.ProcessId) }; if (-not $servers) { Write-Output 'No stale TataDana node process found' }"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Inspect port 3000 owner",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$listener = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if ($listener) { Get-CimInstance Win32_Process -Filter ProcessId=$($listener.OwningProcess) | Select-Object ProcessId,Name,CommandLine } else { Write-Output Port3000Free }"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Verify port owner 8772",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-CimInstance Win32_Process -Filter ProcessId=8772 | Select-Object ProcessId,Name,CommandLine"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Stop TataDana port owner",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Stop-Process -Id 8772 -Force; Write-Output StoppedPID8772"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Apply approval profile migration",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"run",
+				"db:migrate"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check approval auth flow syntax",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"src/app.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Migrate budget period model",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"run",
+				"db:migrate"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check approval polling browser script",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"public/approval.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check wallet selectors",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"public/app.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Verify all SQLite migrations",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"run",
+				"db:migrate"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Inspect TataDana port listener",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$listener = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if ($listener) { Get-CimInstance Win32_Process -Filter ProcessId=$($listener.OwningProcess) | Select-Object ProcessId,Name } else { Write-Output Port3000Free }"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Stop stale TataDana listener",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Stop-Process -Id 15584 -Force; Write-Output StoppedTataDana15584"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Inspect prior smoke-test row",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"-e",
+				"const db = require(\"./src/db/database\"); const rows = db.prepare(\"SELECT id, user_id, type, amount, note, source, occurred_at, created_at FROM transactions WHERE note = ? AND amount = ? ORDER BY id\").all(\"makan siang\", 10000); console.log(JSON.stringify(rows)); db.close();"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Inspect smoke transaction row",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				".inspect-smoke-row.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Remove confirmed smoke-test row",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				".inspect-smoke-row.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Inspect current TataDana listener",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$listener = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if ($listener) { Get-CimInstance Win32_Process -Filter ProcessId=$($listener.OwningProcess) | Select-Object ProcessId,Name } else { Write-Output Port3000Free }"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Stop current TataDana listener",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Stop-Process -Id 14668 -Force; Write-Output StoppedTataDana14668"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Validate integration test syntax",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--check",
+				"test/financial-flows.test.js"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Inspect TataDana listener before final restart",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$listener = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if ($listener) { Get-CimInstance Win32_Process -Filter ProcessId=$($listener.OwningProcess) | Select-Object ProcessId,Name } else { Write-Output Port3000Free }"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Stop final TataDana listener",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Stop-Process -Id 20808 -Force; Write-Output StoppedTataDana20808"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}

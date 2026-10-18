@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fffaf7">
+  <title><%= title %> | TataDana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="app-shell">
+  <aside class="sidebar">
+    <a class="wordmark" href="/dashboard"><span class="brand-mark">t</span>TataDana</a>
+    <div class="sidebar-caption">RUANG KERJA</div>
+    <nav class="side-nav" aria-label="Navigasi utama">
+      <a class="side-link <%= active === 'dashboard' ? 'is-active' : '' %>" href="/dashboard"><span class="side-icon">◫</span>Ringkasan</a>
+      <a class="side-link <%= active === 'transactions' ? 'is-active' : '' %>" href="/transactions"><span class="side-icon">＋</span>Transaksi</a>
+      <a class="side-link <%= active === 'reports' ? 'is-active' : '' %>" href="/reports"><span class="side-icon">▤</span>Laporan</a>
+      <a class="side-link <%= active === 'budgets' ? 'is-active' : '' %>" href="/budgets"><span class="side-icon">◷</span>Budget</a>
+      <a class="side-link <%= active === 'calendar' ? 'is-active' : '' %>" href="/calendar"><span class="side-icon">▦</span>Kalender</a>
+      <a class="side-link <%= active === 'settings' ? 'is-active' : '' %>" href="/settings"><span class="side-icon">⚙</span>Pengaturan</a>
+      <a class="side-link <%= active === 'plans' ? 'is-active' : '' %>" href="/plans"><span class="side-icon">◇</span>Paket</a>
+      <% if (currentUser && currentUser.role === 'admin') { %>
+        <a class="side-link <%= active === 'admin' ? 'is-active' : '' %>" href="/admin"><span class="side-icon">⌘</span>Super Admin</a>
+      <% } %>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-chip"><span class="avatar" style="background:<%= currentUser.avatar_color || '#ffd7c2' %>"><%= currentUser.name.charAt(0) %></span><span class="user-chip-copy"><strong><%= currentUser.name %></strong><small><%= currentUser.role === 'admin' ? 'Super Admin' : 'Akun pribadi' %></small></span></div>
+      <form action="/logout" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="logout-button" type="submit"><span aria-hidden="true">↪</span> Keluar</button>
+      </form>
+    </div>
+  </aside>
+  <main class="workspace">
+    <header class="workspace-topbar"><span class="breadcrumb">TATADANA <span>/</span> <%= active === 'admin' ? 'ADMIN' : active === 'reports' ? 'LAPORAN' : active === 'budgets' ? 'BUDGET' : active === 'calendar' ? 'KALENDER' : active === 'transactions' ? 'TRANSAKSI' : active === 'settings' ? 'PENGATURAN' : active === 'plans' ? 'PAKET' : 'RINGKASAN' %></span><span class="secure-label"><span></span>Sesi aman</span></header>
+    <% if (typeof flash !== 'undefined' && flash) { %><div class="flash-message flash-<%= flash.type %>" role="status"><%= flash.message %></div><% } %>
