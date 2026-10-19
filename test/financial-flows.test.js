@@ -88,6 +88,10 @@ test("bank/e-wallet, Tata AI wallet confirmation, and calendar notes use SQLite 
   const transactionNote = `beli makan 5000 qa-${nonce}`;
   const calendarNote = `Catatan qa-${nonce}`;
   const originalParseText = gemini.parseText;
+  const originalGetOverviewForPeriod = finance.getOverviewForPeriod;
+  const originalGetReport = finance.getReport;
+  const originalGetWallets = finance.getWallets;
+  const originalGetBudgetRecords = finance.getBudgetRecords;
   let server;
   let cookie = "";
   let createdNoteId;
@@ -278,8 +282,32 @@ test("bank/e-wallet, Tata AI wallet confirmation, and calendar notes use SQLite 
     );
     assert.equal(response.status, 200);
     assert.match(await response.text(), new RegExp(calendarNote));
+
+    finance.getOverviewForPeriod = () => ({
+      wallets: null,
+      budgets: null,
+      latest: null,
+      cashflow: null,
+      totals: null,
+      balance: null,
+    });
+    finance.getReport = () => null;
+    finance.getWallets = () => null;
+    finance.getBudgetRecords = () => null;
+
+    response = await fetch(`${baseUrl}/dashboard`, { headers: { cookie } });
+    assert.equal(response.status, 200);
+    assert.match(await response.text(), /0 dompet aktif/);
+
+    response = await fetch(`${baseUrl}/reports`, { headers: { cookie } });
+    assert.equal(response.status, 200);
+    assert.match(await response.text(), /Belum ada transaksi/);
   } finally {
     gemini.parseText = originalParseText;
+    finance.getOverviewForPeriod = originalGetOverviewForPeriod;
+    finance.getReport = originalGetReport;
+    finance.getWallets = originalGetWallets;
+    finance.getBudgetRecords = originalGetBudgetRecords;
     if (createdNoteId)
       database
         .prepare("DELETE FROM notes WHERE id = ? AND user_id = ?")

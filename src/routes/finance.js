@@ -8,6 +8,15 @@ const midtrans = require("../providers/payments/midtrans");
 
 const PLAN_PRICES = { starter: 49000, pro: 99000 };
 
+function asArray(value) {
+  return Array.isArray(value) ? value.filter(Boolean) : [];
+}
+
+function asNumber(value, fallback = 0) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : fallback;
+}
+
 function createFinanceRouter(database, authenticated) {
   const router = express.Router();
 
@@ -36,16 +45,34 @@ function createFinanceRouter(database, authenticated) {
       flash(req, "error", error.message);
       overview = finance.getOverviewForPeriod(database, req.user.id);
     }
-    const categories = getCategories(req.user.id);
+    const data = overview && typeof overview === "object" ? overview : {};
+    const wallets = asArray(data.wallets);
+    overview = {
+      ...data,
+      balance: asNumber(
+        data.balance,
+        wallets.reduce((sum, wallet) => sum + asNumber(wallet.balance), 0),
+      ),
+      totals: {
+        ...(data.totals && typeof data.totals === "object" ? data.totals : {}),
+        income: asNumber(data.totals?.income),
+        expense: asNumber(data.totals?.expense),
+      },
+      wallets,
+      budgets: asArray(data.budgets),
+      latest: asArray(data.latest),
+      cashflow: asArray(data.cashflow),
+    };
+    const categories = asArray(getCategories(req.user.id));
     res.render("pages/dashboard", {
       title: "Ringkasan",
       active: "dashboard",
       overview,
       categories,
       now: finance.jakartaDateTime(),
-      period: overview.period,
-      periodFrom: overview.from,
-      periodTo: overview.to,
+      period: overview.period || "monthly",
+      periodFrom: overview.from || "",
+      periodTo: overview.to || "",
     });
   });
 
@@ -244,10 +271,22 @@ function createFinanceRouter(database, authenticated) {
       search: req.query.q || "",
       page: req.query.page || 1,
     };
-    const report = finance.getReport(database, req.user.id, filters);
-    const wallets = finance.getWallets(database, req.user.id);
-    const categories = getCategories(req.user.id);
-    const budgets = finance.getBudgetRecords(database, req.user.id);
+    const reportData = finance.getReport(database, req.user.id, filters);
+    const totals = reportData?.totals || {};
+    const report = {
+      ...(reportData && typeof reportData === "object" ? reportData : {}),
+      rows: asArray(reportData?.rows),
+      totals: {
+        income: asNumber(totals.income),
+        expense: asNumber(totals.expense),
+      },
+      count: asNumber(reportData?.count),
+      page: Math.max(1, asNumber(reportData?.page, 1)),
+      pages: Math.max(1, asNumber(reportData?.pages, 1)),
+    };
+    const wallets = asArray(finance.getWallets(database, req.user.id));
+    const categories = asArray(getCategories(req.user.id));
+    const budgets = asArray(finance.getBudgetRecords(database, req.user.id));
     res.render("pages/reports", {
       title: "Laporan",
       active: "reports",

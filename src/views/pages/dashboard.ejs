@@ -1,4 +1,17 @@
 <%- include('../partials/app-head', { title, active }) %>
+<%
+  const dashboardData = overview && typeof overview === 'object' ? overview : {};
+  const dashboardWallets = Array.isArray(dashboardData.wallets) ? dashboardData.wallets.filter(Boolean) : [];
+  const dashboardBudgets = Array.isArray(dashboardData.budgets) ? dashboardData.budgets.filter(Boolean) : [];
+  const dashboardTransactions = Array.isArray(dashboardData.latest) ? dashboardData.latest.filter(Boolean) : [];
+  const dashboardCashflow = Array.isArray(dashboardData.cashflow) ? dashboardData.cashflow.filter(Boolean) : [];
+  const dashboardCategories = Array.isArray(categories) ? categories.filter(Boolean) : [];
+  const dashboardTotals = dashboardData.totals && typeof dashboardData.totals === 'object' ? dashboardData.totals : {};
+  const dashboardNumber = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
+  const dashboardBalance = dashboardNumber(dashboardData.balance);
+  const dashboardIncome = dashboardNumber(dashboardTotals.income);
+  const dashboardExpense = dashboardNumber(dashboardTotals.expense);
+%>
 <section class="page-heading dashboard-heading">
   <div><div class="eyebrow"><span class="eyebrow-line"></span>KEUANGAN PRIBADI · WIB</div><h1>Halo, <em><%= currentUser.name.split(' ')[0] %>.</em></h1><p class="heading-copy">Ringkasan keuanganmu untuk hari ini.</p></div>
   <a class="button button-dark" href="#catat-transaksi">+ Catat transaksi</a>
@@ -14,17 +27,17 @@
   <% if (period === 'custom') { %><div class="custom-range-fields"><label>Dari<input type="date" name="from" value="<%= periodFrom %>" required></label><label>Sampai<input type="date" name="to" value="<%= periodTo %>" required></label><button class="button button-outline" type="submit" name="period" value="custom">Terapkan</button></div><% } %>
 </form>
 <section class="stats-grid" aria-label="Ringkasan bulan ini">
-  <article class="stat-card stat-primary"><span class="stat-label">SALDO TOTAL</span><strong><%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(overview.balance) %></strong><small><%= overview.wallets.length %> dompet aktif</small><span class="stat-mark">↗</span></article>
-  <article class="stat-card"><span class="stat-label">PEMASUKAN</span><strong class="positive"><%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(overview.totals.income) %></strong><small>Bulan ini</small></article>
-  <article class="stat-card"><span class="stat-label">PENGELUARAN</span><strong class="negative"><%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(overview.totals.expense) %></strong><small>Bulan ini</small></article>
-  <% const budgetLimit = overview.budgets.reduce((sum, item) => sum + item.limit_amount, 0); const budgetSpent = overview.budgets.reduce((sum, item) => sum + item.spent, 0); %>
-  <article class="stat-card"><span class="stat-label">SISA BUDGET</span><strong><%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Math.max(0, budgetLimit - budgetSpent)) %></strong><small><%= overview.budgets.length ? 'Dari budget yang diatur' : 'Belum ada budget' %></small></article>
+  <article class="stat-card stat-primary"><span class="stat-label">SALDO TOTAL</span><strong><%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(dashboardBalance) %></strong><small><%= dashboardWallets.length %> dompet aktif</small><span class="stat-mark">↗</span></article>
+  <article class="stat-card"><span class="stat-label">PEMASUKAN</span><strong class="positive"><%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(dashboardIncome) %></strong><small>Bulan ini</small></article>
+  <article class="stat-card"><span class="stat-label">PENGELUARAN</span><strong class="negative"><%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(dashboardExpense) %></strong><small>Bulan ini</small></article>
+  <% const budgetLimit = dashboardBudgets.reduce((sum, item) => sum + dashboardNumber(item.limit_amount), 0); const budgetSpent = dashboardBudgets.reduce((sum, item) => sum + dashboardNumber(item.spent), 0); %>
+  <article class="stat-card"><span class="stat-label">SISA BUDGET</span><strong><%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Math.max(0, budgetLimit - budgetSpent)) %></strong><small><%= dashboardBudgets.length ? 'Dari budget yang diatur' : 'Belum ada budget' %></small></article>
 </section>
 <section class="surface-section cashflow-section">
   <div class="section-heading"><div><span class="section-kicker">ARUS UANG · 6 BULAN</span><h2>Pemasukan & pengeluaran</h2></div><div class="chart-legend"><span><i class="legend-income"></i>Masuk</span><span><i class="legend-expense"></i>Keluar</span></div></div>
-  <% const chartMax = Math.max(1, ...overview.cashflow.flatMap((item) => [item.income, item.expense])); %>
+  <% const chartMax = Math.max(1, ...dashboardCashflow.flatMap((item) => [dashboardNumber(item.income), dashboardNumber(item.expense)])); %>
   <div class="cashflow-chart" role="img" aria-label="Grafik pemasukan dan pengeluaran selama enam bulan terakhir">
-    <% overview.cashflow.forEach((item) => { %><div class="chart-month"><div class="chart-bars"><span class="chart-bar chart-income" style="height:<%= Math.max(item.income ? 4 : 0, item.income / chartMax * 100) %>%" title="Pemasukan <%= item.income %>"></span><span class="chart-bar chart-expense" style="height:<%= Math.max(item.expense ? 4 : 0, item.expense / chartMax * 100) %>%" title="Pengeluaran <%= item.expense %>"></span></div><span><%= item.label %></span></div><% }) %>
+    <% dashboardCashflow.forEach((item) => { const income = dashboardNumber(item.income); const expense = dashboardNumber(item.expense); %><div class="chart-month"><div class="chart-bars"><span class="chart-bar chart-income" style="height:<%= Math.max(income ? 4 : 0, income / chartMax * 100) %>%" title="Pemasukan <%= income %>"></span><span class="chart-bar chart-expense" style="height:<%= Math.max(expense ? 4 : 0, expense / chartMax * 100) %>%" title="Pengeluaran <%= expense %>"></span></div><span><%= item.label || '—' %></span></div><% }) %>
   </div>
 </section>
 <section class="dashboard-grid">
@@ -32,21 +45,21 @@
     <section class="surface-section wallet-section">
       <div class="section-heading"><div><span class="section-kicker">TEMPAT DANA DISIMPAN</span><h2>Dompet</h2></div><a href="/settings">Kelola dompet <span>↗</span></a></div>
       <div class="wallet-list">
-        <% overview.wallets.forEach((wallet) => { %>
+        <% dashboardWallets.forEach((wallet) => { %>
           <article class="wallet-row"><span class="wallet-color" style="--wallet-color:<%= wallet.color %>"></span><span class="wallet-name"><strong><%= wallet.name %></strong><% if (wallet.is_default) { %><small>Dompet default</small><% } %></span><strong class="wallet-balance"><%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(wallet.balance) %></strong></article>
         <% }) %>
       </div>
     </section>
     <section class="surface-section budget-section">
       <div class="section-heading"><div><span class="section-kicker">PANTAU PENGELUARAN</span><h2>Budget periode ini</h2></div><a href="/budgets">Atur budget <span>↗</span></a></div>
-      <% if (overview.budgets.length) { %>
-        <div class="budget-list"><% overview.budgets.forEach((budget) => { %><article class="budget-row"><div class="budget-meta"><span><%= budget.emoji %> <%= budget.name %></span><strong><%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(budget.spent) %> <small>/ <%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(budget.limit_amount) %></small></strong></div><div class="progress-track"><span class="progress-fill <%= budget.percent >= budget.alert_threshold ? 'progress-alert' : '' %>" style="width:<%= budget.percent %>%"></span></div><small class="budget-percent"><%= budget.percent %>% terpakai<% if (budget.percent >= budget.alert_threshold) { %> · mendekati batas<% } %></small></article><% }) %></div>
+      <% if (dashboardBudgets.length) { %>
+        <div class="budget-list"><% dashboardBudgets.forEach((budget) => { %><article class="budget-row"><div class="budget-meta"><span><%= budget.emoji || '' %> <%= budget.name || 'Budget' %></span><strong><%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(dashboardNumber(budget.spent)) %> <small>/ <%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(dashboardNumber(budget.limit_amount)) %></small></strong></div><div class="progress-track"><span class="progress-fill <%= dashboardNumber(budget.percent) >= dashboardNumber(budget.alert_threshold) ? 'progress-alert' : '' %>" style="width:<%= dashboardNumber(budget.percent) %>%"></span></div><small class="budget-percent"><%= dashboardNumber(budget.percent) %>% terpakai<% if (dashboardNumber(budget.percent) >= dashboardNumber(budget.alert_threshold)) { %> · mendekati batas<% } %></small></article><% }) %></div>
       <% } else { %><p class="empty-inline">Belum ada budget. Atur batas bulanan untuk kategori pengeluaranmu.</p><% } %>
     </section>
     <section class="surface-section recent-section">
       <div class="section-heading"><div><span class="section-kicker">AKTIVITAS TERBARU</span><h2>Transaksi</h2></div><a href="/reports">Lihat laporan <span>↗</span></a></div>
-      <% if (overview.latest.length) { %>
-        <div class="transaction-list"><% overview.latest.forEach((item) => { %><article class="transaction-row"><span class="transaction-icon <%= item.type %>"><%= item.type === 'income' ? '↓' : item.type === 'transfer' ? '⇄' : '↑' %></span><span class="transaction-description"><strong><%= item.note || (item.type === 'transfer' ? 'Transfer antar dompet' : item.category_name) %></strong><small><%= item.category_emoji || '↔' %> <%= item.category_name || (item.wallet_name + ' → ' + item.destination_wallet_name) %> · <%= item.wallet_name %></small></span><span class="transaction-amount <%= item.type === 'income' ? 'positive' : item.type === 'expense' ? 'negative' : '' %>"><%= item.type === 'income' ? '+' : item.type === 'expense' ? '−' : '' %><%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(item.amount) %></span></article><% }) %></div>
+      <% if (dashboardTransactions.length) { %>
+        <div class="transaction-list"><% dashboardTransactions.forEach((item) => { const transactionType = item.type || 'expense'; %><article class="transaction-row"><span class="transaction-icon <%= transactionType %>"><%= transactionType === 'income' ? '↓' : transactionType === 'transfer' ? '⇄' : '↑' %></span><span class="transaction-description"><strong><%= item.note || (transactionType === 'transfer' ? 'Transfer antar dompet' : item.category_name || 'Transaksi') %></strong><small><%= item.category_emoji || '↔' %> <%= item.category_name || ([item.wallet_name, item.destination_wallet_name].filter(Boolean).join(' → ') || 'Tanpa dompet') %></small></span><span class="transaction-amount <%= transactionType === 'income' ? 'positive' : transactionType === 'expense' ? 'negative' : '' %>"><%= transactionType === 'income' ? '+' : transactionType === 'expense' ? '−' : '' %><%= new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(dashboardNumber(item.amount)) %></span></article><% }) %></div>
       <% } else { %><p class="empty-inline">Belum ada transaksi. Catatan pertamamu akan muncul di sini.</p><% } %>
     </section>
   </div>
@@ -57,9 +70,9 @@
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <label for="transaction-type">Jenis transaksi</label><select id="transaction-type" name="type" required><option value="expense">Pengeluaran</option><option value="income">Pemasukan</option><option value="transfer">Transfer</option></select>
         <label for="transaction-amount">Nominal (Rp)</label><input id="transaction-amount" name="amount" type="number" inputmode="numeric" min="1" step="1" placeholder="0" required>
-        <div data-category-field><label for="transaction-category">Kategori</label><select id="transaction-category" name="category_id"><% categories.forEach((category) => { %><option value="<%= category.id %>" data-type="<%= category.type %>"><%= category.emoji %> <%= category.name %></option><% }) %></select></div>
-        <label for="transaction-wallet">Dompet</label><select id="transaction-wallet" name="wallet_id" required><% overview.wallets.forEach((wallet) => { %><option value="<%= wallet.id %>" <%= wallet.is_default ? 'selected' : '' %>><%= wallet.name %></option><% }) %></select>
-        <div data-destination-field hidden><label for="transaction-destination">Dompet tujuan</label><select id="transaction-destination" name="to_wallet_id"><% overview.wallets.forEach((wallet) => { %><option value="<%= wallet.id %>"><%= wallet.name %></option><% }) %></select></div>
+        <div data-category-field><label for="transaction-category">Kategori</label><select id="transaction-category" name="category_id"><% dashboardCategories.forEach((category) => { %><option value="<%= category.id %>" data-type="<%= category.type %>"><%= category.emoji || '' %> <%= category.name || 'Kategori' %></option><% }) %></select></div>
+        <label for="transaction-wallet">Dompet</label><select id="transaction-wallet" name="wallet_id" required><% dashboardWallets.forEach((wallet) => { %><option value="<%= wallet.id %>" <%= wallet.is_default ? 'selected' : '' %>><%= wallet.name || 'Dompet' %></option><% }) %></select>
+        <div data-destination-field hidden><label for="transaction-destination">Dompet tujuan</label><select id="transaction-destination" name="to_wallet_id"><% dashboardWallets.forEach((wallet) => { %><option value="<%= wallet.id %>"><%= wallet.name || 'Dompet' %></option><% }) %></select></div>
         <label for="transaction-note">Catatan</label><input id="transaction-note" name="note" type="text" maxlength="240" placeholder="Contoh: makan siang">
         <label for="transaction-date">Tanggal dan waktu (WIB)</label><input id="transaction-date" name="occurred_at" type="datetime-local" value="<%= now %>" required>
         <button class="button button-dark form-submit" type="submit">Simpan transaksi <span>↗</span></button>
