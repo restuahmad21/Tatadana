@@ -2,6 +2,7 @@ const { randomBytes, timingSafeEqual } = require("node:crypto");
 
 function csrfProtection(req, res, next) {
   if (req.path.startsWith("/webhooks/")) return next();
+  res.set("Cache-Control", "no-store");
   if (!req.session.csrfToken) {
     req.session.csrfToken = randomBytes(32).toString("hex");
   }

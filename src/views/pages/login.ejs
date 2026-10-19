@@ -2,11 +2,11 @@
 <main class="login-main">
   <a class="back-link" href="/">← <span>Kembali ke beranda</span></a>
   <div class="login-panel">
-    <div class="eyebrow"><span class="eyebrow-line"></span>SELAMAT DATANG KEMBALI</div>
-    <h1>Masuk ke<br><em>ruangmu.</em></h1>
-    <p class="login-description">Gunakan email dan password akun TataDana.</p>
+    <div class="eyebrow"><span class="eyebrow-line"></span><%= isAdminLogin ? 'AKSES ADMINISTRATOR' : 'SELAMAT DATANG KEMBALI' %></div>
+    <h1><%= isAdminLogin ? 'Masuk sebagai' : 'Masuk ke' %><br><em><%= isAdminLogin ? 'admin.' : 'ruangmu.' %></em></h1>
+    <p class="login-description"><%= isAdminLogin ? 'Gunakan kredensial administrator TataDana.' : 'Gunakan email dan password akun pengguna TataDana.' %></p>
     <% if (error) { %><div class="form-error" role="alert"><span>!</span><%= error %></div><% } %>
-    <form class="login-form" method="post" action="/login">
+    <form class="login-form" method="post" action="<%= isAdminLogin ? '/admin/login' : '/login' %>">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <label for="email">Email</label>
       <input id="email" name="email" type="email" autocomplete="username" value="<%= email %>" placeholder="nama@email.com" required autofocus>
@@ -14,7 +14,7 @@
       <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Masukkan password" required>
       <button class="button button-dark login-submit" type="submit">Masuk <span aria-hidden="true">↗</span></button>
     </form>
-    <p class="login-footnote"><span class="lock-icon">▣</span> Koneksi dan sesi terlindungi. <a href="/register">Buat akun</a></p>
+    <p class="login-footnote"><span class="lock-icon">▣</span> Koneksi dan sesi terlindungi. <% if (isAdminLogin) { %><a href="/login">Masuk sebagai pengguna</a><% } else { %><a href="/register">Buat akun</a> · <a href="/admin/login">Masuk admin</a><% } %></p>
   </div>
 </main>
 <%- include('../partials/public-foot') %>

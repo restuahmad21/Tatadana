@@ -2105,3 +2105,190 @@ th {
     font-size: 15px;
   }
 }
+
+.transaction-workspace {
+  max-width: 1240px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  align-items: start;
+  gap: 14px;
+}
+.tata-chat {
+  min-height: 520px;
+  display: grid;
+  grid-template-rows: auto minmax(180px, 1fr) auto;
+}
+.chat-header {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid var(--line);
+}
+.chat-avatar,
+.tata-ai-fab-mark {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  color: #fff;
+  background: var(--deep-green);
+  font: 800 19px var(--serif);
+}
+.chat-header > div {
+  display: grid;
+  gap: 4px;
+}
+.chat-header > div strong {
+  font: 700 13px var(--display);
+}
+.chat-header > div small,
+.chat-mode {
+  color: var(--muted);
+  font-size: 10px;
+}
+.chat-mode {
+  margin-left: auto;
+  font-family: var(--mono);
+}
+.chat-messages {
+  min-height: 0;
+  max-height: 380px;
+  padding: 16px 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  overflow-y: auto;
+}
+.chat-bubble {
+  max-width: min(88%, 440px);
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fbf8f5;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.user-bubble {
+  align-self: flex-end;
+  border-color: #c9501b;
+  background: #c9501b;
+  color: #fff;
+}
+.draft-status {
+  color: var(--muted);
+  font-size: 10px;
+}
+.draft-status span {
+  width: 7px;
+  height: 7px;
+  margin-right: 5px;
+  display: inline-block;
+  border-radius: 50%;
+  background: #d29a32;
+}
+.chat-compose {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.chat-compose input {
+  min-width: 0;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: #fff;
+}
+.chat-compose input:focus {
+  outline: 2px solid rgba(201, 80, 27, 0.18);
+  border-color: var(--deep-green);
+}
+.chat-compose button {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  color: #fff;
+  font-size: 11px;
+  cursor: pointer;
+}
+.transaction-history {
+  min-width: 0;
+}
+.transaction-history .transaction-row {
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+}
+.tata-ai-fab {
+  position: fixed;
+  z-index: 20;
+  right: 24px;
+  bottom: 22px;
+  min-height: 54px;
+  padding: 0 16px 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 5px;
+  background: var(--deep-green);
+  box-shadow: 0 8px 24px rgba(50, 36, 27, 0.2);
+  color: #fff;
+  font: 700 12px var(--display);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+.tata-ai-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 11px 26px rgba(50, 36, 27, 0.25);
+}
+.tata-ai-fab:focus-visible {
+  outline: 3px solid #f3b58e;
+  outline-offset: 3px;
+}
+.tata-ai-fab-mark {
+  width: 31px;
+  height: 31px;
+  color: var(--deep-green);
+  background: #fff;
+}
+#tata-ai-chat {
+  scroll-margin-top: 20px;
+}
+@media (max-width: 850px) {
+  .transaction-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tata-chat {
+    min-height: 440px;
+  }
+  .chat-messages {
+    max-height: 300px;
+  }
+}
+@media (max-width: 620px) {
+  .tata-ai-fab {
+    right: 14px;
+    bottom: 14px;
+    min-height: 50px;
+    padding-right: 13px;
+  }
+  .tata-chat {
+    min-height: 400px;
+  }
+  .chat-mode {
+    display: none;
+  }
+  .chat-bubble {
+    max-width: 94%;
+  }
+}

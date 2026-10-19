@@ -2,7 +2,7 @@
 <main class="approval-main" data-approval-page data-status-url="/approval/status">
   <div class="approval-mark"><span class="brand-mark">t</span></div>
   <div class="eyebrow"><span class="eyebrow-line"></span>STATUS PENDAFTARAN</div>
-  <h1 id="approval-heading"><%= user.approval_status === 'rejected' ? 'Pendaftaran belum disetujui.' : 'Satu langkah lagi.' %></h1>
+  <h1 id="approval-heading"><%= user.approval_status === 'rejected' ? 'Pendaftaran belum disetujui.' : 'Menunggu konfirmasi.' %></h1>
   <p class="approval-copy" data-approval-message>
     <% if (user.approval_status === 'rejected') { %>
       Pendaftaran untuk <strong><%= user.email %></strong> tidak disetujui.<% if (user.rejection_reason) { %> Alasan: <%= user.rejection_reason %><% } %>

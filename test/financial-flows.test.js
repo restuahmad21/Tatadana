@@ -16,6 +16,52 @@ function csrfFrom(html) {
   return token;
 }
 
+test("new registrations land on the pending confirmation page", async () => {
+  const nonce = crypto.randomBytes(6).toString("hex");
+  const email = `pending-${nonce}@example.test`;
+  let server;
+  let userId;
+  let cookie = "";
+
+  try {
+    server = app.listen(0);
+    await new Promise((resolve) => server.once("listening", resolve));
+    const baseUrl = `http://127.0.0.1:${server.address().port}`;
+    let response = await fetch(`${baseUrl}/register`);
+    cookie = cookieFrom(response);
+    const registerHtml = await response.text();
+    assert.equal(response.headers.get("cache-control"), "no-store");
+
+    response = await submitForm(baseUrl, "/register", cookie, {
+      _csrf: csrfFrom(registerHtml),
+      name: "Pengguna Uji",
+      email,
+      password: "password-uji-123",
+    });
+    assert.equal(response.status, 302);
+    assert.equal(response.headers.get("location"), "/approval");
+    cookie = cookieFrom(response) || cookie;
+
+    response = await fetch(`${baseUrl}/approval`, { headers: { cookie } });
+    assert.equal(response.status, 200);
+    assert.match(await response.text(), /Menunggu konfirmasi/);
+    const user = database
+      .prepare("SELECT id, approval_status FROM users WHERE email = ?")
+      .get(email);
+    assert.equal(user.approval_status, "pending");
+    userId = user.id;
+  } finally {
+    if (userId) database.prepare("DELETE FROM users WHERE id = ?").run(userId);
+    if (cookie) {
+      const value = decodeURIComponent(cookie.slice(cookie.indexOf("=") + 1));
+      const sid = value.startsWith("s:") ? value.slice(2).split(".")[0] : null;
+      if (sid)
+        database.prepare("DELETE FROM app_sessions WHERE sid = ?").run(sid);
+    }
+    if (server) await new Promise((resolve) => server.close(resolve));
+  }
+});
+
 async function submitForm(baseUrl, path, cookie, values) {
   return fetch(`${baseUrl}${path}`, {
     method: "POST",
@@ -58,19 +104,46 @@ test("bank/e-wallet, Tata AI wallet confirmation, and calendar notes use SQLite 
     await new Promise((resolve) => server.once("listening", resolve));
     const baseUrl = `http://127.0.0.1:${server.address().port}`;
 
-    let response = await fetch(`${baseUrl}/login`);
+    let response = await fetch(`${baseUrl}/admin/login`);
     cookie = cookieFrom(response);
     const loginHtml = await response.text();
+    assert.match(loginHtml, /value="restu@tatadana\.id"/);
+    assert.match(loginHtml, /<form[^>]+action="\/admin\/login"/);
+    const loginToken = csrfFrom(loginHtml);
     response = await submitForm(baseUrl, "/login", cookie, {
-      _csrf: csrfFrom(loginHtml),
+      _csrf: loginToken,
       email: "restu@tatadana.id",
-      password: "Restu21!",
+      password: "restu21!",
+    });
+    assert.equal(response.status, 403);
+    assert.match(await response.text(), /halaman masuk admin/);
+
+    response = await submitForm(baseUrl, "/admin/login", cookie, {
+      _csrf: loginToken,
+      email: "restu@tatadana.id",
+      password: "restu21!",
     });
     assert.equal(response.status, 302);
+    assert.equal(response.headers.get("location"), "/admin");
     cookie = cookieFrom(response) || cookie;
+    const sessionId = decodeURIComponent(cookie.slice(cookie.indexOf("=") + 1))
+      .slice(2)
+      .split(".")[0];
+    const storedSession = JSON.parse(
+      database
+        .prepare("SELECT sess FROM app_sessions WHERE sid = ?")
+        .get(sessionId).sess,
+    );
+    assert.equal(storedSession.user.role, "admin");
+
+    response = await fetch(`${baseUrl}/admin`, { headers: { cookie } });
+    assert.equal(response.status, 200);
 
     response = await fetch(`${baseUrl}/settings`, { headers: { cookie } });
     const settingsHtml = await response.text();
+    assert.match(settingsHtml, /href="\/transactions#tata-ai-chat"/);
+    assert.match(settingsHtml, /CIMB Niaga/);
+    assert.match(settingsHtml, /ShopeePay/);
     const settingsCsrf = csrfFrom(settingsHtml);
     response = await submitForm(baseUrl, "/settings/wallets", cookie, {
       _csrf: settingsCsrf,
@@ -106,7 +179,11 @@ test("bank/e-wallet, Tata AI wallet confirmation, and calendar notes use SQLite 
 
     response = await fetch(`${baseUrl}/transactions`, { headers: { cookie } });
     const transactionHtml = await response.text();
+    assert.match(transactionHtml, /id="tata-ai-chat"/);
     const transactionCsrf = csrfFrom(transactionHtml);
+    const initialCashBalance = finance
+      .getWallets(database, admin.id)
+      .find((wallet) => wallet.name === "Tunai").balance;
     response = await submitForm(baseUrl, "/transactions/assistant", cookie, {
       _csrf: transactionCsrf,
       message: transactionNote,
@@ -130,12 +207,15 @@ test("bank/e-wallet, Tata AI wallet confirmation, and calendar notes use SQLite 
       1,
       "the parsed transaction draft is persisted while awaiting wallet selection",
     );
+    response = await fetch(`${baseUrl}/transactions`, { headers: { cookie } });
+    assert.match(await response.text(), /Menggunakan dompet yang mana\?/);
 
     response = await submitForm(baseUrl, "/transactions/assistant", cookie, {
       _csrf: transactionCsrf,
       message: "Tunai",
     });
     assert.equal(response.status, 302);
+    assert.match(response.headers.get("location"), /^\/reports\?q=/);
     const transaction = database
       .prepare(
         "SELECT id, type, amount, note FROM transactions WHERE user_id = ? AND note = ?",
@@ -150,6 +230,19 @@ test("bank/e-wallet, Tata AI wallet confirmation, and calendar notes use SQLite 
         note: transactionNote,
       },
     );
+    assert.equal(
+      finance
+        .getWallets(database, admin.id)
+        .find((wallet) => wallet.name === "Tunai").balance,
+      initialCashBalance - 5000,
+    );
+    response = await fetch(`${baseUrl}${response.headers.get("location")}`, {
+      headers: { cookie },
+    });
+    assert.equal(response.status, 200);
+    const reportsHtml = await response.text();
+    assert.match(reportsHtml, new RegExp(transactionNote));
+    assert.match(reportsHtml, /Tersimpan/);
 
     const today = finance.jakartaParts();
     const date = `${today.year}-${today.month}-${today.day}`;

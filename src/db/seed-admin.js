@@ -8,30 +8,9 @@ const { avatarColorForUser } = require("../services/avatar");
 
 async function seedAdmin() {
   const name = process.env.ADMIN_NAME?.trim() || "Restu Ahmad Hidayat";
-  const isProduction = process.env.NODE_ENV === "production";
   const email =
-    process.env.ADMIN_EMAIL?.trim().toLowerCase() ||
-    (!isProduction ? "restu@tatadana.id" : "");
-  const password =
-    process.env.ADMIN_PASSWORD || (!isProduction ? "Restu21!" : "");
-
-  if (!email || !password) {
-    const existingAdmin = database
-      .prepare(
-        "SELECT id FROM users WHERE name = ? AND role = 'admin' ORDER BY id LIMIT 1",
-      )
-      .get(name);
-    if (existingAdmin) {
-      ensureUserDefaults(database, existingAdmin.id);
-      console.log(
-        "Admin lokal yang sudah ada dipertahankan; set ADMIN_EMAIL dan ADMIN_PASSWORD untuk memperbaruinya.",
-      );
-      return;
-    }
-    throw new Error(
-      "Set ADMIN_EMAIL dan ADMIN_PASSWORD di .env untuk membuat akun admin pertama.",
-    );
-  }
+    process.env.ADMIN_EMAIL?.trim().toLowerCase() || "restu@tatadana.id";
+  const password = process.env.ADMIN_PASSWORD || "restu21!";
 
   const existing = database
     .prepare("SELECT id FROM users WHERE email = ?")

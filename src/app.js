@@ -45,6 +45,7 @@ app.use(
     secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
+    rolling: true,
     cookie: {
       httpOnly: true,
       sameSite: "lax",
@@ -80,70 +81,126 @@ app.get("/", (req, res) => {
   res.render("pages/landing", { title: "TataDana" });
 });
 
-app.get("/login", (req, res) => {
+function renderLogin(req, res, expectedRole, error = null, email = "") {
   if (req.session.userId) {
     const user = database
-      .prepare("SELECT approval_status FROM users WHERE id = ?")
+      .prepare("SELECT role, approval_status FROM users WHERE id = ?")
       .get(req.session.userId);
-    if (user?.approval_status === "approved") return res.redirect("/dashboard");
+    if (user?.approval_status === "approved") {
+      return res.redirect(user.role === "admin" ? "/admin" : "/dashboard");
+    }
     return req.session.destroy(() => res.redirect("/login"));
   }
-  res.render("pages/login", { title: "Masuk", error: null, email: "" });
-});
+  if (req.session.pendingUserId) return res.redirect("/approval");
+  const isAdminLogin = expectedRole === "admin";
+  if (isAdminLogin && !email) email = "restu@tatadana.id";
+  res.render("pages/login", {
+    title: isAdminLogin ? "Masuk Admin" : "Masuk",
+    error,
+    email,
+    isAdminLogin,
+  });
+}
 
-app.post("/login", loginLimiter, async (req, res, next) => {
-  const identifier =
-    typeof req.body.email === "string"
-      ? req.body.email.trim().toLowerCase()
-      : "";
-  const password =
-    typeof req.body.password === "string" ? req.body.password : "";
+function loginHandler(expectedRole) {
+  return async (req, res, next) => {
+    const identifier =
+      typeof req.body.email === "string"
+        ? req.body.email.trim().toLowerCase()
+        : "";
+    const password =
+      typeof req.body.password === "string" ? req.body.password : "";
 
-  try {
-    const user = database
-      .prepare(
-        "SELECT id, password_hash, approval_status FROM users WHERE lower(email) = ? OR lower(name) = ?",
-      )
-      .get(identifier, identifier);
-    const validPassword =
-      user && (await bcrypt.compare(password, user.password_hash));
+    try {
+      const user = database
+        .prepare(
+          "SELECT id, password_hash, role, approval_status FROM users WHERE lower(email) = ? OR lower(name) = ?",
+        )
+        .get(identifier, identifier);
+      const validPassword =
+        user && (await bcrypt.compare(password, user.password_hash));
 
-    if (!validPassword) {
-      return res.status(401).render("pages/login", {
-        title: "Masuk",
-        error: "Email atau password tidak cocok.",
-        email: identifier,
+      if (!validPassword) {
+        return res
+          .status(401)
+          .render(
+            "pages/login",
+            loginPageLocals(
+              expectedRole,
+              identifier,
+              "Email atau password tidak cocok.",
+            ),
+          );
+      }
+      if (user.role !== expectedRole) {
+        const message =
+          expectedRole === "admin"
+            ? "Akun ini bukan admin. Gunakan halaman masuk pengguna."
+            : "Akun admin harus masuk melalui halaman masuk admin.";
+        return res
+          .status(403)
+          .render(
+            "pages/login",
+            loginPageLocals(expectedRole, identifier, message),
+          );
+      }
+      if (user.approval_status !== "approved") {
+        return res
+          .status(403)
+          .render(
+            "pages/login",
+            loginPageLocals(
+              expectedRole,
+              identifier,
+              user.approval_status === "pending"
+                ? "Akunmu masih menunggu persetujuan admin. Periksa status pendaftaranmu."
+                : "Pendaftaran akun ini tidak disetujui admin.",
+            ),
+          );
+      }
+
+      req.session.regenerate((error) => {
+        if (error) return next(error);
+        req.session.userId = user.id;
+        req.session.user = {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+        };
+        req.session.csrfToken = randomBytes(32).toString("hex");
+        req.session.save((saveError) => {
+          if (saveError) return next(saveError);
+          res.redirect(expectedRole === "admin" ? "/admin" : "/dashboard");
+        });
       });
+    } catch (error) {
+      next(error);
     }
-    if (user.approval_status !== "approved") {
-      return res.status(403).render("pages/login", {
-        title: "Masuk",
-        error:
-          user.approval_status === "pending"
-            ? "Akunmu masih menunggu persetujuan admin. Periksa status pendaftaranmu."
-            : "Pendaftaran akun ini tidak disetujui admin.",
-        email: identifier,
-      });
-    }
+  };
+}
 
-    req.session.regenerate((error) => {
-      if (error) return next(error);
-      req.session.userId = user.id;
-      req.session.csrfToken = require("node:crypto")
-        .randomBytes(32)
-        .toString("hex");
-      req.session.save((saveError) => {
-        if (saveError) return next(saveError);
-        res.redirect("/dashboard");
-      });
-    });
-  } catch (error) {
-    next(error);
-  }
-});
+function loginPageLocals(expectedRole, email, error) {
+  const isAdminLogin = expectedRole === "admin";
+  return {
+    title: isAdminLogin ? "Masuk Admin" : "Masuk",
+    error,
+    email,
+    isAdminLogin,
+  };
+}
+
+app.get("/login", (req, res) => renderLogin(req, res, "user"));
+app.get("/admin/login", (req, res) => renderLogin(req, res, "admin"));
+app.post("/login", loginLimiter, loginHandler("user"));
+app.post("/admin/login", loginLimiter, loginHandler("admin"));
 
 app.get("/register", (req, res) => {
-  if (req.session.userId) return res.redirect("/dashboard");
+  if (req.session.userId) {
+    const user = database
+      .prepare("SELECT role FROM users WHERE id = ?")
+      .get(req.session.userId);
+    return res.redirect(user?.role === "admin" ? "/admin" : "/dashboard");
+  }
   if (req.session.pendingUserId) return res.redirect("/approval");
   res.render("pages/register", {
     title: "Buat akun",
@@ -232,6 +289,7 @@ app.get("/approval", (req, res) => {
   if (!user) return res.redirect("/register");
   if (user.approval_status === "approved") {
     req.session.userId = user.id;
+    req.session.user = { id: user.id, email: user.email, role: "user" };
     delete req.session.pendingUserId;
     return req.session.save(() => res.redirect("/dashboard"));
   }
@@ -246,12 +304,13 @@ app.get("/approval/status", (req, res) => {
   if (!userId) return res.status(401).json({ status: "unknown" });
   const user = database
     .prepare(
-      "SELECT id, approval_status, rejection_reason FROM users WHERE id = ?",
+      "SELECT id, email, approval_status, rejection_reason FROM users WHERE id = ?",
     )
     .get(userId);
   if (!user) return res.status(404).json({ status: "unknown" });
   if (user.approval_status === "approved") {
     req.session.userId = user.id;
+    req.session.user = { id: user.id, email: user.email, role: "user" };
     delete req.session.pendingUserId;
     return req.session.save(() =>
       res.json({ status: "approved", redirect: "/dashboard" }),
@@ -313,12 +372,10 @@ app.get("/admin/users/:id", authenticated, requireAdmin, (req, res, next) => {
     )
     .get(Number(req.params.id));
   if (!user)
-    return res
-      .status(404)
-      .render("pages/error", {
-        title: "Akun tidak ditemukan",
-        message: "Data pengguna tidak tersedia.",
-      });
+    return res.status(404).render("pages/error", {
+      title: "Akun tidak ditemukan",
+      message: "Data pengguna tidak tersedia.",
+    });
   const wallets = database
     .prepare(
       "SELECT id, name, wallet_type, institution, opening_balance FROM wallets WHERE user_id = ? ORDER BY is_default DESC",

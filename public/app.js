@@ -51,11 +51,18 @@ const walletForm = document.querySelector("[data-wallet-form]");
 
 if (walletForm) {
   const walletType = walletForm.querySelector("[data-wallet-type]");
+  const walletName = walletForm.querySelector('[name="name"]');
+  const walletNameExamples = {
+    cash: "Dompet Fisik atau Kotak Kas",
+    bank: "BCA Harian",
+    ewallet: "GoPay Harian",
+  };
   const institutionFields = [
     ...walletForm.querySelectorAll("[data-institution-field]"),
   ];
 
   function updateWalletFields() {
+    walletName.placeholder = `Contoh: ${walletNameExamples[walletType.value]}`;
     for (const field of institutionFields) {
       const active = field.dataset.institutionField === walletType.value;
       field.hidden = !active;

@@ -12,9 +12,6 @@ async function start() {
 
   const app = require("./app");
   const port = process.env.PORT || 8080;
-  app.listen(port, () => {
-    console.log(`Server berjalan di port ${port}`);
-  });
   const stopPolling = startPolling(database);
   const stopReminders = startReminderScheduler(database);
   const server = app.listen(port, () =>

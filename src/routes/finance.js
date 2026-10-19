@@ -89,11 +89,11 @@ function createFinanceRouter(database, authenticated) {
         ? req.body.message.trim().slice(0, 240)
         : "";
     const messages = (req.session.tataAiMessages || []).slice(-7);
-    const reply = (message) => {
+    const reply = (message, redirectTo = "/transactions") => {
       if (text) messages.push({ role: "user", text });
       messages.push({ role: "assistant", text: message });
       req.session.tataAiMessages = messages.slice(-8);
-      res.redirect("/transactions");
+      res.redirect(redirectTo);
     };
     if (!text) return reply("Tulis detail transaksi terlebih dahulu.");
 
@@ -173,8 +173,11 @@ function createFinanceRouter(database, authenticated) {
           .prepare("DELETE FROM tata_ai_drafts WHERE id = ? AND user_id = ?")
           .run(draft.id, req.user.id);
         delete req.session.tataDraftId;
+        const confirmation = `Transfer ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(parsed.amount)} dari ${wallets.find((wallet) => wallet.id === parsed.wallet_id).name} ke ${selectedWallet.name} berhasil dicatat.`;
+        flash(req, "success", confirmation);
         return reply(
-          `Transfer ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(parsed.amount)} dari ${wallets.find((wallet) => wallet.id === parsed.wallet_id).name} ke ${selectedWallet.name} berhasil dicatat.`,
+          confirmation,
+          `/reports?q=${encodeURIComponent(parsed.note || "")}`,
         );
       } catch (error) {
         return reply(`Transfer belum tersimpan: ${error.message}`);
@@ -220,8 +223,11 @@ function createFinanceRouter(database, authenticated) {
         .prepare("DELETE FROM tata_ai_drafts WHERE id = ? AND user_id = ?")
         .run(draft.id, req.user.id);
       delete req.session.tataDraftId;
+      const confirmation = `Tersimpan ✓ ${parsed.type === "income" ? "Pemasukan" : "Pengeluaran"} ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(parsed.amount)} dari ${selectedWallet.name} · ${category.name}.`;
+      flash(req, "success", confirmation);
       return reply(
-        `Tersimpan ✓ ${parsed.type === "income" ? "Pemasukan" : "Pengeluaran"} ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(parsed.amount)} dari ${selectedWallet.name} · ${category.name}.`,
+        confirmation,
+        `/reports?q=${encodeURIComponent(parsed.note || "")}`,
       );
     } catch (error) {
       return reply(`Transaksi belum tersimpan: ${error.message}`);

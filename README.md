@@ -10,7 +10,7 @@ Prasyarat: Node.js 22.13 atau lebih baru. Tidak perlu memasang server database; 
 Copy-Item .env.example .env
 ```
 
-Isi `ADMIN_PASSWORD` di `.env` sebelum first run pada database baru. Kredensial tidak disimpan di source atau template env. Email admin standar `restu@tatadana.id`; nama `Restu Ahmad Hidayat`. Seeder membuat hash bcrypt dan dapat memperbarui admin lama. Jika admin sudah ada dan variabel email/password belum diisi, akun yang ada dipertahankan.
+Seeder membaca `ADMIN_EMAIL` dan `ADMIN_PASSWORD` saat startup; jika tidak diatur, default admin adalah `restu@tatadana.id` dengan password `restu21!`. Password disimpan sebagai hash bcrypt dan akun yang cocok dipastikan ber-role admin serta disetujui. Login admin tersedia di `/admin/login`; login pengguna tersedia di `/login`.
 
 ```powershell
 npm.cmd install
@@ -46,4 +46,4 @@ Pembayaran berjalan manual tanpa konfigurasi eksternal. Untuk checkout Midtrans,
 
 ## Rute
 
-`/` landing publik, `/login` dan `/register` publik, `/dashboard`, `/reports`, `/settings`, `/plans` terproteksi, dan `/admin` khusus admin. Webhook Telegram dan Midtrans menerima secret/signature provider, bukan sesi browser.
+`/` landing publik, `/login`, `/admin/login`, dan `/register` publik. Registrasi baru berstatus menunggu konfirmasi admin di `/approval`; `/dashboard`, `/reports`, `/settings`, `/plans`, dan `/admin` terproteksi sesuai role. Webhook Telegram dan Midtrans menerima secret/signature provider, bukan sesi browser.

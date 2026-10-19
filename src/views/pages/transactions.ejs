@@ -1,7 +1,7 @@
 <%- include('../partials/app-head', { title, active }) %>
 <section class="page-heading compact-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span>CATATAN KEUANGAN</div><h1>Transaksi <em>terhubung.</em></h1><p class="heading-copy">Catat manual atau mulai percakapan dengan Tata AI.</p></div><a class="button button-outline" href="/reports">Buka laporan <span>↗</span></a></section>
 <section class="transaction-workspace">
-  <div class="surface-section tata-chat">
+  <div class="surface-section tata-chat" id="tata-ai-chat">
     <header class="chat-header"><span class="chat-avatar">t</span><div><strong>Tata AI</strong><small><span class="status-dot status-dot-on"></span> Siap membantu · data tersimpan di akunmu</small></div><span class="chat-mode">TEKS + AI</span></header>
     <div class="chat-messages" aria-live="polite">
       <% if (!messages.length) { %><div class="chat-bubble assistant-bubble"><strong>Halo, <%= currentUser.name.split(' ')[0] %>.</strong><br>Ceritakan transaksi, misalnya “beli makan 5000” atau “nasgor 15000”. Saya akan memastikan wallet yang digunakan sebelum menyimpan.</div><% } %>
