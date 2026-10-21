@@ -1,0 +1,78 @@
+{
+  "usr_tatadana_001": {
+    "id": "usr_tatadana_001",
+    "full_name": "Budi Pratama",
+    "phone_number": "081234567890",
+    "email": "budi.pratama@tatadana.id",
+    "job_profile": "Lead Software Architect",
+    "job_title": "Lead Software Architect",
+    "bio": "Menabung untuk kemandirian finansial dan dana pensiun dini.",
+    "default_currency": "IDR",
+    "avatar_url": "/uploads/avatars/avatar_usr_tatadana_001_1792587455864.png",
+    "updated_at": "2026-10-21T12:57:35.868Z"
+  },
+  "usr_admin_restu": {
+    "id": "usr_admin_restu",
+    "full_name": "Restu Ahmad Hidayat",
+    "phone_number": "083194703373",
+    "email": "restu21@tatadana.com",
+    "username": "restu21@tatadana.com",
+    "job_profile": "Administrator & System Architect",
+    "job_title": "Administrator & System Architect",
+    "bio": "System Administrator TataDana",
+    "default_currency": "IDR",
+    "avatar_url": "/uploads/avatars/default-avatar.svg",
+    "updated_at": "2026-10-18T00:00:00.000Z"
+  },
+  "usr_tatadana_003": {
+    "id": "usr_tatadana_003",
+    "full_name": "Dewi Sartika",
+    "email": "dewisartika@tatadana.id",
+    "phone_number": "",
+    "job_profile": "",
+    "job_title": "",
+    "bio": "",
+    "default_currency": "IDR",
+    "avatar_url": "/uploads/avatars/default-avatar.svg",
+    "created_at": "2026-10-17T23:46:13.455Z",
+    "updated_at": "2026-10-17T23:46:13.455Z"
+  },
+  "usr_tatadana_005": {
+    "id": "usr_tatadana_005",
+    "full_name": "Siti Nurhaliza S.E.",
+    "phone_number": "087811223344",
+    "email": "user.1792587480605@tatadana.id",
+    "job_profile": "Senior Financial Analyst",
+    "job_title": "Senior Financial Analyst",
+    "bio": "Fokus pada alokasi instrumen investasi dan dana darurat keluarga.",
+    "default_currency": "IDR",
+    "avatar_url": "/uploads/avatars/default-avatar.svg",
+    "updated_at": "2026-10-21T12:58:00.674Z"
+  },
+  "usr_tatadana_006": {
+    "id": "usr_tatadana_006",
+    "full_name": "Bambang Pamungkas",
+    "email": "bambangpamungkas@tatadana.id",
+    "phone_number": "",
+    "job_profile": "",
+    "job_title": "",
+    "bio": "",
+    "default_currency": "IDR",
+    "avatar_url": "/uploads/avatars/default-avatar.svg",
+    "created_at": "2026-10-21T12:41:30.088Z",
+    "updated_at": "2026-10-21T12:41:30.088Z"
+  },
+  "usr_tatadana_007": {
+    "id": "usr_tatadana_007",
+    "full_name": "Bima Satria Polling",
+    "email": "bimasatriapolling@tatadana.id",
+    "phone_number": "",
+    "job_profile": "",
+    "job_title": "",
+    "bio": "",
+    "default_currency": "IDR",
+    "avatar_url": "/uploads/avatars/default-avatar.svg",
+    "created_at": "2026-10-21T12:41:30.120Z",
+    "updated_at": "2026-10-21T12:41:30.120Z"
+  }
+}

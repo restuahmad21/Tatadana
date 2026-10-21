@@ -1,0 +1,22 @@
+[
+  {
+    "id": "usr_admin_restu",
+    "full_name": "Restu Ahmad Hidayat",
+    "phone_number": "083194703373",
+    "email": "restu21@tatadana.com",
+    "username": "restu21@tatadana.com",
+    "password": "restuahmad21",
+    "role": "admin",
+    "approval_status": "approved",
+    "is_approved": true,
+    "whatsapp_verified": true,
+    "phone_verified": true,
+    "plan": "pro",
+    "telegram_connected": false,
+    "telegram_username": null,
+    "custom_bot_token": null,
+    "total_transactions": 0,
+    "job_profile": "Administrator & System Architect",
+    "joined_at": "2026-10-18"
+  }
+]

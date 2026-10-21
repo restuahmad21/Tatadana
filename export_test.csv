@@ -1,0 +1,10 @@
+ID,Tanggal (WIB),Jenis,Nominal,Kategori,Dompet,Catatan,Sumber
+"tx_1791611132541","10/10/2026, 12.45.32","expense","35000","Makanan & Minuman","BCA Utama","makan siang nasi bebek 35rb","telegram_text"
+"tx_01","10/10/2026, 12.15.00","expense","25000","Makanan & Minuman","BCA Utama","Nasi Padang Rendang + Teh Hangat","telegram_text"
+"tx_02","9/10/2026, 09.00.00","income","7500000","Gaji Bulanan","BCA Utama","Transfer Gaji Pokok PT Maju Terus","web"
+"tx_03","8/10/2026, 19.40.00","expense","84500","Belanja & Groceries","GoPay","Struk Indomaret Point (3 item)","telegram_receipt"
+"tx_04","7/10/2026, 07.30.00","expense","50000","Transportasi","BCA Utama","Isi Pertamax Motor Vario","telegram_voice"
+"tx_05","5/10/2026, 20.15.00","expense","180000","Hiburan & Lifestyle","BCA Utama","Tiket Bioskop XXI IMAX","web"
+"tx_06","4/10/2026, 11.00.00","transfer","500000","","BCA Utama","Top up GoPay bulanan","web"
+"tx_07","3/10/2026, 14.30.00","income","1000000","Project Freelance","BCA Utama","DP Desain Logo Klien Bali","telegram_text"
+"tx_08","2/10/2026, 10.00.00","expense","350000","Tagihan & Utilitas","BCA Utama","Tagihan Listrik PLN Pascabayar","web"
